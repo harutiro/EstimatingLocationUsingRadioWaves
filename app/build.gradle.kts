@@ -63,4 +63,10 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    //ibeacon
+    implementation("org.altbeacon:android-beacon-library:2.20.4")
+
+    //easyPermission
+    implementation("pub.devrel:easypermissions:3.0.0")
 }
