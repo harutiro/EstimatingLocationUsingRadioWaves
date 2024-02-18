@@ -1,25 +1,41 @@
 package net.harutiro.estimatinglocationusingradiowaves
 
 import android.Manifest
+import android.app.PendingIntent
+import android.app.PendingIntent.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.harutiro.estimatinglocationusingradiowaves.ui.theme.EstimatingLocationUsingRadioWavesTheme
 import org.altbeacon.beacon.Beacon
 import org.altbeacon.beacon.BeaconManager
 import org.altbeacon.beacon.BeaconParser
 import org.altbeacon.beacon.Region
 import pub.devrel.easypermissions.EasyPermissions
+
 
 class MainActivity : ComponentActivity() {
 
@@ -39,7 +55,9 @@ class MainActivity : ComponentActivity() {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH_CONNECT,
             Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_ADVERTISE
+            Manifest.permission.BLUETOOTH_ADVERTISE,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.CHANGE_WIFI_STATE
         )
     }else{
         arrayOf(
@@ -83,11 +101,51 @@ class MainActivity : ComponentActivity() {
             beaconManager.startRangingBeacons(mRegion)
         }
 
+        // wifi系
+        val wifiManager = this.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+        val wifiScanReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                val success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
+                Log.d(TAG + "_WiFi","なんか受信はしたっぽい")
+                Log.d(TAG + "_WiFi",success.toString())
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    val results = wifiManager.scanResults
+                    for( item in results){
+                        Log.d(TAG + "_WiFi","timestamp:${item.timestamp} SSID: ${item.SSID}, rssi: ${item.level}, BSSID: ${item.BSSID}")
+                    }
+                }
+            }
+        }
+
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
+        this.registerReceiver(wifiScanReceiver, intentFilter)
+
         setContent {
             EstimatingLocationUsingRadioWavesTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     Greeting("Android")
+                    Button(onClick = {
+                        // CoroutineScopeを作成
+                        CoroutineScope(Dispatchers.Main).launch {
+                            // 3秒間隔でスキャンを行う10回
+                            repeat(10) {
+                                // 以下の処理はUIスレッド以外で行う
+                                withContext(Dispatchers.IO) {
+                                    wifiManager.startScan()
+                                }
+                                delay(3000)
+                            }
+                        }
+                    }) {
+                        Text(text = "Start")
+                    }
                 }
             }
         }
