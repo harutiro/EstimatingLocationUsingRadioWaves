@@ -64,9 +64,16 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+    // jetpack
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+
     //ibeacon
     implementation("org.altbeacon:android-beacon-library:2.20.4")
 
     //easyPermission
     implementation("pub.devrel:easypermissions:3.0.0")
+
+    // Rxjava
+    implementation ("io.reactivex.rxjava3:rxandroid:3.0.2")
+    implementation ("io.reactivex.rxjava3:rxjava:3.1.5")
 }

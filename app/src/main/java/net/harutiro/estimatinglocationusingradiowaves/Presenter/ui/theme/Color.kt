@@ -1,4 +1,4 @@
-package net.harutiro.estimatinglocationusingradiowaves.ui.theme
+package net.harutiro.estimatinglocationusingradiowaves.Presenter.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
