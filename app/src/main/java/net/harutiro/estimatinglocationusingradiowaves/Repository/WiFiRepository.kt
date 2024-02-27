@@ -32,8 +32,8 @@ class WiFiRepository(context: Context) : SensorBase(context) {
     override suspend fun start(filename: String, samplingFrequency: Double) {
         super.start(filename, samplingFrequency)
         wifiApi.getScanResults(context){ scanResults ->
+            val time = DateUtils.getTimeStamp()
             for (scanResult in scanResults){
-                val time = DateUtils.getTimeStamp()
                 val data = "$time , ${scanResult.BSSID} , ${scanResult.level}"
                 addQueue(
                     sensorName = sensorName,
