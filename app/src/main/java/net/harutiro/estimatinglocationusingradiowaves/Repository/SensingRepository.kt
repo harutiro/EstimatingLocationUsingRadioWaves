@@ -6,7 +6,10 @@ import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import java.io.File
 
 class SensingRepository(context: Context) {
 
@@ -31,17 +34,21 @@ class SensingRepository(context: Context) {
         }
     }
 
-    fun sensorStop(sensors: MutableList<SensorBase>, onStopped:() -> Unit) {
-        val a = Completable.concat(sensors.map { sensor ->
-            sensor.stop()
-        })
+    fun sensorStop(sensors: MutableList<SensorBase>, onStopped: (List<File?>) -> Unit) {
+        val singles = sensors.map { sensor ->
+            sensor.stop()  // This should return Single<File?>
+        }
+
+        val disposable: Disposable = Single.zip(singles) { results ->
+            results.map { it as File? }
+        }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                {
+                { files ->
                     Log.d(TAG, "センサー停止 成功")
-                    //センサーが終了した時にMainActivityに伝える。
-                    onStopped()
+                    // センサーが終了した時にMainActivityに伝える。
+                    onStopped(files)
                 },
                 { e ->
                     Log.e(TAG, "センサー停止 失敗", e)

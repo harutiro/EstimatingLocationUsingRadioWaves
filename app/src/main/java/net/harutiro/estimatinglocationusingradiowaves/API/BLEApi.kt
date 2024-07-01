@@ -21,6 +21,9 @@ class BLEApi {
     //出力結果を保存する場所
     var outputText = ""
 
+    // beaconManager
+    var beaconManager: BeaconManager? = null
+
 
     val permissions = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
         arrayOf(
@@ -53,17 +56,17 @@ class BLEApi {
             //id1:uuid id2:major id3:minor
             val mRegion = Region("unique-id-001", null, null, null)
 
-            val beaconManager = BeaconManager.getInstanceForApplication(context)
+            beaconManager = BeaconManager.getInstanceForApplication(context)
             // Set up a Live Data observer so this Activity can get ranging callbacks
             // observer will be called each time the monitored regionState changes (inside vs. outside region)
-            beaconManager.getRegionViewModel(mRegion).rangedBeacons.observe(lifecycleOwner, rangingObserver)
-            beaconManager.beaconParsers.add(BeaconParser().setBeaconLayout(IBEACON_FORMAT))
-            beaconManager.startRangingBeacons(mRegion)
+            beaconManager?.getRegionViewModel(mRegion)?.rangedBeacons?.observe(lifecycleOwner, rangingObserver)
+            beaconManager?.beaconParsers?.add(BeaconParser().setBeaconLayout(IBEACON_FORMAT))
+            beaconManager?.startRangingBeacons(mRegion)
         }
     }
 
-    fun stopBLEBeaconScan(context:Context){
-        val beaconManager = BeaconManager.getInstanceForApplication(context)
-        beaconManager.removeAllRangeNotifiers()
+    fun stopBLEBeaconScan(){
+        val mRegion = Region("unique-id-001", null, null, null)
+        beaconManager?.stopRangingBeacons(mRegion)
     }
 }

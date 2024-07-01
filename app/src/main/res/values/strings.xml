@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">EstimatingLocationUsingRadioWaves</string>
+    <string name="base_url">http://100.104.9.91:8010/</string>
 </resources>

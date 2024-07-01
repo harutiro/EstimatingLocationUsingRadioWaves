@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import net.harutiro.estimatinglocationusingradiowaves.Utils.DateUtils
 import java.io.BufferedWriter
+import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
 
@@ -61,9 +62,10 @@ class OtherFileStorageApi(
         handler.post(runnable)
     }
 
-    fun stop() {
+    fun stop() : File {
         // 別スレッドを停止
         handler.removeCallbacks(runnable)
+        return File(filePath)
     }
 
     fun saveArrayDeque(copy: Array<Any?>) {

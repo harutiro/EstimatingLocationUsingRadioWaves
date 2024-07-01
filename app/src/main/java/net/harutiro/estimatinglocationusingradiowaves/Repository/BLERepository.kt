@@ -6,10 +6,12 @@ import android.hardware.Sensor
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 import net.harutiro.estimatinglocationusingradiowaves.API.BLEApi
 import net.harutiro.estimatinglocationusingradiowaves.Utils.DateUtils
 import net.harutiro.estimatinglocationusingradiowaves.Utils.extension.SensorExtension
 import org.altbeacon.beacon.Beacon
+import java.io.File
 
 
 class BLERepository(context: Context): SensorBase(context) {
@@ -50,8 +52,8 @@ class BLERepository(context: Context): SensorBase(context) {
         }
     }
 
-    override fun stop(): Completable {
-        bleApi.stopBLEBeaconScan(context)
+    override fun stop(): Single<File> {
+        bleApi.stopBLEBeaconScan()
 
         return super.stop()
     }

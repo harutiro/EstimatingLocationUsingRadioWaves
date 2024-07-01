@@ -6,6 +6,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
+import net.harutiro.estimatinglocationusingradiowaves.API.ApiResponse
+import net.harutiro.estimatinglocationusingradiowaves.API.OtherFileStorageApi
 import net.harutiro.estimatinglocationusingradiowaves.Repository.BLERepository
 import net.harutiro.estimatinglocationusingradiowaves.Repository.SensingRepository
 import net.harutiro.estimatinglocationusingradiowaves.Repository.SensorBase
@@ -16,9 +18,12 @@ class MainViewModel (application: Application): AndroidViewModel(application) {
     var targetSensors: MutableList<SensorBase> = mutableListOf()
     private val context get() = getApplication<Application>().applicationContext
 
+    val apiResponse = ApiResponse(context)
+
     var sensorRepository = SensingRepository(context)
 
     var sensorStartFlag = false
+
 
 
     fun addSensor(lifecycleOwner: LifecycleOwner){
@@ -45,7 +50,15 @@ class MainViewModel (application: Application): AndroidViewModel(application) {
     fun stop(onStopped:() -> Unit){
         sensorRepository.sensorStop(
             sensors = targetSensors,
-            onStopped = onStopped
+            onStopped = { sensorFileList ->
+                val bleFile = sensorFileList[0]
+                val wifiFile = sensorFileList[1]
+
+                if(bleFile != null && wifiFile != null){
+                    apiResponse.postCsvData(wifiFile, bleFile)
+                }
+                onStopped()
+            }
         )
         sensorStartFlag = false
     }

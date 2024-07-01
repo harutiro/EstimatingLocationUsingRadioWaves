@@ -7,14 +7,15 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.util.Log
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 import net.harutiro.estimatinglocationusingradiowaves.API.OtherFileStorageApi
+import java.io.File
 
 abstract class SensorBase(val context: Context): SensorEventListener {
     private lateinit var sensorManager: SensorManager
     private var PreSensor: Sensor? = null
     val queue: ArrayDeque<String> = ArrayDeque(listOf())
     var otherFileStorage: OtherFileStorageApi? = null
-//    var sensorDBUsecase : SensorDBUsecase? = null
 
     var samplingFrequency = -1.0
 
@@ -24,9 +25,6 @@ abstract class SensorBase(val context: Context): SensorEventListener {
     fun init() {
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         PreSensor = sensorManager.getDefaultSensor(sensorType)
-
-//        this.sensorDBUsecase = SensorDBUsecase()
-//        sensorDBUsecase?.init(context = context)
     }
 
     open suspend fun start(filename: String, samplingFrequency:Double) {
@@ -38,24 +36,19 @@ abstract class SensorBase(val context: Context): SensorEventListener {
         this.samplingFrequency = samplingFrequency
     }
 
-    open fun stop(): Completable {
-        otherFileStorage?.stop()
+    open fun stop(): Single<File> {
+        val sensingFile = otherFileStorage?.stop()
         sensorManager.unregisterListener(this)
-//        val item = SensorItemDataClass(
-//            id = 0,
-//            filePath = otherFileStorage?.filePath.toString(),
-//            fileName = "${DateUtils.getNowDate()}_${sensorName}_PixelWache.csv",
-//            date = DateUtils.getNowDate()
-//        )
-//        return sensorDBUsecase?.insert(item)
-        return Completable.complete()
+
+        return if (sensingFile != null) {
+            Single.just(sensingFile)
+        } else {
+            Single.error(Exception("sensingFile is null"))
+        }
     }
 
     var nowTime:Long = 0
     fun addQueue(sensorName:String,data: String,timeStamp:Long) {
-
-//        Log.d(sensorName, "差分:${timeStamp - nowTime}")
-//        Log.d(sensorName,"周波数:${frequency2second(samplingFrequency) * 1000}")
 
         // -1.0の場合はサンプリング周波数を考慮しない
         if(samplingFrequency == -1.0){

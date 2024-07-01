@@ -5,12 +5,14 @@ import android.content.Context
 import android.net.wifi.ScanResult
 import android.util.Log
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import net.harutiro.estimatinglocationusingradiowaves.API.WiFiApi
 import net.harutiro.estimatinglocationusingradiowaves.Utils.DateUtils
 import net.harutiro.estimatinglocationusingradiowaves.Utils.extension.SensorExtension
+import java.io.File
 
 class WiFiRepository(context: Context) : SensorBase(context) {
 
@@ -55,7 +57,7 @@ class WiFiRepository(context: Context) : SensorBase(context) {
         }
     }
 
-    override fun stop(): Completable {
+    override fun stop(): Single<File> {
         isScanning = false
         return super.stop()
     }
